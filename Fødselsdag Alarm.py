@@ -5,7 +5,20 @@ import time
 import os
 import schedule
 from plyer import notification
+# Lydfil #
+import winsound
 
+def play_sound(sound_file="bad-to-the-bone.wav"):
+    """Spil en brugerdefineret .wav fil i Windows."""
+    if not os.path.exists(sound_file):
+        print(f"(Lyfil '{sound_file}' ikke fundet.)")
+        return
+
+    try:
+        winsound.PlaySound(sound_file, winsound.SND_FILENAME | winsound.SND_ASYNC)
+    except Exception as e:
+        print("Kunne ike afspil lyd:", e)
+#-----------------------------#
 BIRTHDAY_FILE = "fødselsdage.csv"
 CHECK_TIME = "09:00"  # Dagtid for at tjeke fødselsdage
 REMINDER_DAYS = [0, 1, 7]  # Notifikation 1 day før, og 7 days før
@@ -106,12 +119,12 @@ def tjek_fødselsdag(fødselsdag):
     print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Tjeker fødselsdage...") #sætter op en skabelon for et dato
     alerts = []
     for person in fødselsdag:
-        days_tilbAlder = person.days_indtil_fødselsdag()
-        if days_tilbAlder in REMINDER_DAYS:
+        days_tilbage = person.days_indtil_fødselsdag()
+        if days_tilbage in REMINDER_DAYS:
             alder_text = ""
-            if days_tilbAlder == 0 and person.nuværende_alder() is not None:
+            if days_tilbage == 0 and person.nuværende_alder() is not None:
                 alder_text = f" — de bliver {person.nuværende_alder()}!"
-            when = "I dag" if days_tilbAlder == 0 else f"om {days_tilbAlder} dage"
+            when = "I dag" if days_tilbage == 0 else f"om {days_tilbage} dage"
             alerts.append(f"{person.navn}s fødselsdag er {when}{alder_text}")
 
     if alerts:
@@ -122,6 +135,7 @@ def tjek_fødselsdag(fødselsdag):
             message=message,
             timeout=10
         )
+        play_sound("bad-to-the-bone.wav")
     else:
         print("Intet kommende fødselsdag...")
 
