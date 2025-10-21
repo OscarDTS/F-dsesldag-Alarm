@@ -21,14 +21,14 @@ def play_sound(sound_file="bad-to-the-bone.wav"):
 #-----------------------------#
 BIRTHDAY_FILE = "fødselsdage.csv"
 CHECK_TIME = "09:00"  # Dagtid for at tjeke fødselsdage
-REMINDER_DAYS = [0, 1, 7]  # Notifikation 1 day før, og 7 days før
+REMINDER_DAYS = [0, 1, 7]  # Notifikation 1 month før, og 7 days før
 
 #Fødselsdag Alarm
 class Person:
-    def __init__(self, navn, day, month, year=None):
+    def __init__(self, navn, month, day, year=None):
         self.navn = str(navn)
-        self.day = int(day)
         self.month = int(month)
+        self.day = int(day)
         self.year = int(year) if year not in (None, "", "Intet") else None
 
     def næste_fødselsdag(self):
@@ -36,14 +36,14 @@ class Person:
         today = datetime.date.today()
         year = int(today.year)
         try:
-            fday = datetime.date(year, self.month, self.day)
+            fday = datetime.date(year, self.day, self.month)
         except ValueError:
             # handler Feb 29 fødselsdag på skudåre
             fday = datetime.date(year, 2, 28)
 
         if fday < today:
             try:
-                fday = datetime.date(year + 1, self.month, self.day)
+                fday = datetime.date(year + 1, self.day, self.month)
             except ValueError:
                 fday = datetime.date(year + 1, 2, 28)
         return fday
@@ -58,13 +58,13 @@ class Person:
         if today is None:
             today = datetime.date.today()
         Alder = today.year - self.year
-        if (today.month, today.day) < (self.month, self.day):
+        if (today.day, today.month) < (self.day, self.month):
             Alder -= 1
         return Alder
 
     def to_list(self):
         """Returner CSV som en list"""
-        return [self.navn, self.month, self.day, self.year if self.year else ""]
+        return [self.navn, self.day, self.month, self.year if self.year else ""]
 
     @staticmethod
     def from_list(row):
@@ -87,7 +87,7 @@ def indlæs_fødselsdag():
 def gem_fødselsdag(fødselsdag):
     with open(BIRTHDAY_FILE, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["navn", "month", "day", "year"])
+        writer.writerow(["navn", "day", "month", "year"])
         for p in fødselsdag:
             writer.writerow(p.to_list())
 
@@ -95,15 +95,15 @@ def gem_fødselsdag(fødselsdag):
 def tilføj_fødselsdag(fødselsdag):
     print("\n--- Tiljøj en fødselsdag ---")
     navn = input("Angiv navn: ").strip()
-    month = int(input("Angiv måned (1-12): "))
     day = int(input("Angiv dag (1-31): "))
+    month = int(input("Angiv måned (1-12): "))
     year_input = input("Angiv fødsels år (valgfri): ").strip()
     year = int(year_input) if year_input else None
 
-    person = Person(navn, month, day, year)
+    person = Person(navn, day, month, year)
     fødselsdag.append(person)
     gem_fødselsdag(fødselsdag)
-    print(f"Tilføjet {navn}s fødselsdag ({month}/{day}/{year or '----'})!")
+    print(f"Tilføjet {navn}s fødselsdag ({day}/{month}/{year or '----'})!")
 
 def vise_fødselsdag(fødselsdag):
     print("\n=-=-=-=- Fødselsdagslist -=-=-=-=")
@@ -113,7 +113,7 @@ def vise_fødselsdag(fødselsdag):
     for p in fødselsdag:
         alder_text = f", Alder: {p.nuværende_alder()}" if p.nuværende_alder() is not None else ""
         y = f" ({p.year})" if p.year else ""
-        print(f"- {p.navn}: {p.month:02d}-{p.day:02d}{y}{alder_text}")
+        print(f"- {p.navn}: {p.day:02d}-{p.month:02d}{y}{alder_text}")
 
 def tjek_fødselsdag(fødselsdag):
     print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Tjeker fødselsdage...") #sætter op en skabelon for et dato
@@ -141,7 +141,7 @@ def tjek_fødselsdag(fødselsdag):
 
 def daily_scheduler(fødselsdag):
     schedule.clear()
-    schedule.every().day.at(CHECK_TIME).do(tjek_fødselsdag, fødselsdag=fødselsdag)
+    schedule.every().month.at(CHECK_TIME).do(tjek_fødselsdag, fødselsdag=fødselsdag)
     print(f"\nDaglig fødselsdag tjek tidsplanlagt til {CHECK_TIME}. (Press Ctrl+C to stop)")
     tjek_fødselsdag(fødselsdag)
     try:
