@@ -11,13 +11,13 @@ import winsound
 def play_sound(sound_file="bad-to-the-bone.wav"):
     """Spil en brugerdefineret .wav fil i Windows."""
     if not os.path.exists(sound_file):
-        print(f"(Lyfil '{sound_file}' ikke fundet.)")
+        print(f"(Lydfil '{sound_file}' ikke fundet.)")
         return
 
     try:
         winsound.PlaySound(sound_file, winsound.SND_FILENAME | winsound.SND_ASYNC)
     except Exception as e:
-        print("Kunne ike afspil lyd:", e)
+        print("Kunne ikke afspil lyd:", e)
 #-----------------------------#
 BIRTHDAY_FILE = "fødselsdage.csv"
 CHECK_TIME = "09:00"  # Dagtid for at tjeke fødselsdage
