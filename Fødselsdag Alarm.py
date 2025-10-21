@@ -25,10 +25,10 @@ REMINDER_DAYS = [0, 1, 7]  # Notifikation 1 month før, og 7 days før
 
 #Fødselsdag Alarm
 class Person:
-    def __init__(self, navn, month, day, year=None):
+    def __init__(self, navn, day, month, year=None):
         self.navn = str(navn)
-        self.month = int(month)
         self.day = int(day)
+        self.month = int(month)
         self.year = int(year) if year not in (None, "", "Intet") else None
 
     def næste_fødselsdag(self):
@@ -36,14 +36,14 @@ class Person:
         today = datetime.date.today()
         year = int(today.year)
         try:
-            fday = datetime.date(year, self.day, self.month)
+            fday = datetime.date(year, self.month, self.day)
         except ValueError:
             # handler Feb 29 fødselsdag på skudåre
             fday = datetime.date(year, 2, 28)
 
         if fday < today:
             try:
-                fday = datetime.date(year + 1, self.day, self.month)
+                fday = datetime.date(year + 1, self.month, self.day)
             except ValueError:
                 fday = datetime.date(year + 1, 2, 28)
         return fday
@@ -58,7 +58,7 @@ class Person:
         if today is None:
             today = datetime.date.today()
         Alder = today.year - self.year
-        if (today.day, today.month) < (self.day, self.month):
+        if (today.month, today.day) < (self.month, self.day):
             Alder -= 1
         return Alder
 
@@ -116,7 +116,7 @@ def vise_fødselsdag(fødselsdag):
         print(f"- {p.navn}: {p.day:02d}-{p.month:02d}{y}{alder_text}")
 
 def tjek_fødselsdag(fødselsdag):
-    print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}] Tjeker fødselsdage...") #sætter op en skabelon for et dato
+    print(f"[{datetime.datetime.now().strftime('%d-%m-%Y %H:%M')}] Tjeker fødselsdage...") #sætter op en skabelon for et dato
     alerts = []
     for person in fødselsdag:
         days_tilbage = person.days_indtil_fødselsdag()
